@@ -13,10 +13,13 @@
     --accent:#8ab4f8;--accent-hover:#aecbfa;--accent-dim:rgba(138,180,248,0.12);
     --danger:#f28b82;--danger-dim:rgba(242,139,130,0.12);
     --success:#81c995;--success-dim:rgba(129,201,149,0.15);
+    --warning:#fdd663;--warning-dim:rgba(253,214,99,0.15);
     --border:#5f6368;--shadow:rgba(0,0,0,0.4);--radius:12px;--radius-sm:8px;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg-primary);color:var(--text-primary);font-family:'Outfit','Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-y:auto;}
+
+  /* Auth */
   .auth-bar{position:fixed;top:12px;right:16px;z-index:50;display:flex;align-items:center;gap:10px;}
   .auth-bar .user-name{font-size:12px;color:var(--text-secondary);}
   .auth-bar .user-avatar{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid var(--bg-tertiary);}
@@ -26,10 +29,14 @@
   .btn-auth.logout:hover{background:var(--bg-hover);}
   .sync-badge{font-size:11px;color:var(--success);display:flex;align-items:center;gap:4px;}
   .sync-badge::before{content:'';width:6px;height:6px;background:var(--success);border-radius:50%;display:inline-block;}
+
+  /* Bookmark */
   .bookmark-bar{margin-top:48px;margin-bottom:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 16px;}
   .bm-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;background:var(--bg-secondary);border:1px solid var(--bg-tertiary);border-radius:20px;text-decoration:none;color:var(--text-secondary);font-size:13px;font-family:inherit;transition:all .15s;white-space:nowrap;}
   .bm-pill:hover{background:var(--bg-tertiary);color:var(--text-primary);border-color:var(--border);box-shadow:0 1px 4px var(--shadow);}
   .bm-emoji{font-size:15px;line-height:1;}
+
+  /* Search */
   .search-container{margin-top:0;margin-bottom:36px;width:100%;max-width:584px;position:relative;}
   .search-logo{text-align:center;margin-bottom:28px;font-size:64px;font-weight:700;letter-spacing:-2px;background:linear-gradient(135deg,#4285f4 0%,#ea4335 25%,#fbbc05 50%,#34a853 75%,#4285f4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .search-bar{width:100%;height:48px;background:var(--bg-secondary);border:1px solid var(--bg-tertiary);border-radius:24px;display:flex;align-items:center;padding:0 18px;transition:all .2s ease;cursor:text;}
@@ -37,17 +44,72 @@
   .search-icon{color:var(--text-secondary);margin-right:12px;flex-shrink:0;}
   .search-bar input{flex:1;background:none;border:none;outline:none;color:var(--text-primary);font-size:16px;font-family:inherit;}
   .search-bar input::placeholder{color:var(--text-secondary);}
+
+  /* Shortcuts */
   .shortcuts-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:680px;margin-bottom:44px;padding:0 16px;}
   .shortcut{display:flex;flex-direction:column;align-items:center;width:96px;text-decoration:none;cursor:pointer;border-radius:var(--radius);padding:12px 4px;transition:background .15s;}
   .shortcut:hover{background:var(--bg-secondary);}
   .shortcut-icon{width:48px;height:48px;border-radius:50%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;}
   .shortcut-icon img{width:24px;height:24px;border-radius:2px;}
   .shortcut-label{font-size:12px;color:var(--text-secondary);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;}
-  .todo-section{width:100%;max-width:600px;margin-bottom:60px;padding:0 16px;}
-  .todo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px;}
-  .todo-title{font-size:16px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px;}
-  .todo-title svg{color:var(--accent);}
-  .todo-count{font-size:12px;color:var(--text-muted);background:var(--bg-secondary);padding:3px 10px;border-radius:12px;}
+
+  /* ── Quest Section ── */
+  .quest-section{width:100%;max-width:640px;margin-bottom:36px;padding:0 16px;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;}
+  .section-title{font-size:16px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px;}
+  .section-title svg{color:var(--accent);}
+  .quest-count{font-size:12px;color:var(--text-muted);background:var(--bg-secondary);padding:3px 10px;border-radius:12px;}
+  .btn-quest-add{padding:5px 14px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(138,180,248,0.25);border-radius:20px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;}
+  .btn-quest-add:hover{background:var(--accent);color:#202124;border-color:var(--accent);}
+
+  .quest-cards{display:flex;flex-direction:column;gap:8px;max-height:310px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg-tertiary) transparent;}
+  .quest-cards::-webkit-scrollbar{width:5px;}
+  .quest-cards::-webkit-scrollbar-thumb{background:var(--bg-tertiary);border-radius:4px;}
+
+  .quest-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-secondary);border-radius:var(--radius);border-left:4px solid var(--accent);transition:all .15s;animation:slideIn .2s ease;}
+  .quest-card:hover{background:var(--bg-hover);}
+  .quest-card.p1{border-left-color:#f28b82;}
+  .quest-card.p2{border-left-color:#fdd663;}
+  .quest-card.p3{border-left-color:#8ab4f8;}
+  .quest-card.p4{border-left-color:var(--border);}
+  .quest-card.due-today{background:rgba(242,139,130,0.1);}
+  .quest-card.due-tomorrow{background:rgba(253,214,99,0.08);}
+
+  .quest-priority{font-size:11px;font-weight:700;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .quest-card.p1 .quest-priority{background:rgba(242,139,130,0.2);color:var(--danger);}
+  .quest-card.p2 .quest-priority{background:rgba(253,214,99,0.2);color:var(--warning);}
+  .quest-card.p3 .quest-priority{background:var(--accent-dim);color:var(--accent);}
+  .quest-card.p4 .quest-priority{background:var(--bg-tertiary);color:var(--text-muted);}
+
+  .quest-body{flex:1;min-width:0;}
+  .quest-text{font-size:14px;color:var(--text-primary);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .quest-due{font-size:11px;color:var(--text-muted);margin-top:3px;}
+  .quest-card.due-today .quest-due{color:var(--danger);font-weight:600;}
+  .quest-card.due-tomorrow .quest-due{color:var(--warning);font-weight:600;}
+
+  .btn-quest-done{padding:5px 12px;background:var(--success-dim);color:var(--success);border:none;border-radius:16px;font-size:11px;font-family:inherit;cursor:pointer;transition:all .15s;flex-shrink:0;font-weight:600;}
+  .btn-quest-done:hover{background:var(--success);color:#202124;}
+
+  .quest-empty{text-align:center;padding:28px 16px;color:var(--text-muted);font-size:14px;}
+
+  /* Quest Add Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.active{display:flex;}
+  .modal{background:var(--bg-secondary);border-radius:var(--radius);padding:24px;width:420px;max-width:90vw;box-shadow:0 8px 32px var(--shadow);}
+  .modal h3{font-size:16px;margin-bottom:16px;}
+  .modal label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+  .modal input,.modal select{width:100%;height:38px;background:var(--bg-primary);border:1px solid var(--bg-tertiary);border-radius:var(--radius-sm);padding:0 12px;color:var(--text-primary);font-size:14px;font-family:inherit;outline:none;margin-bottom:14px;transition:border-color .2s;}
+  .modal input:focus,.modal select:focus{border-color:var(--accent);}
+  .modal select option{background:var(--bg-primary);color:var(--text-primary);}
+  .modal-row{display:flex;gap:12px;}
+  .modal-row>div{flex:1;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+  .modal-actions button{padding:8px 20px;border:none;border-radius:var(--radius-sm);font-size:14px;font-family:inherit;cursor:pointer;transition:all .15s;}
+  .btn-cancel{background:var(--bg-tertiary);color:var(--text-primary);}.btn-cancel:hover{background:var(--bg-hover);}
+  .btn-save{background:var(--accent);color:#202124;font-weight:600;}.btn-save:hover{background:var(--accent-hover);}
+
+  /* ── Daily To-Do ── */
+  .todo-section{width:100%;max-width:640px;margin-bottom:60px;padding:0 16px;}
   .todo-input-row{display:flex;gap:8px;margin-bottom:12px;}
   .todo-input-row input{flex:1;height:42px;background:var(--bg-secondary);border:1px solid var(--bg-tertiary);border-radius:var(--radius-sm);padding:0 14px;color:var(--text-primary);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
   .todo-input-row input:focus{border-color:var(--accent);}
@@ -64,37 +126,15 @@
   .todo-item.done .todo-checkbox{background:var(--success-dim);border-color:var(--success);}
   .todo-checkbox svg{display:none;}.todo-item.done .todo-checkbox svg{display:block;color:var(--success);}
   .todo-text{flex:1;font-size:14px;color:var(--text-primary);line-height:1.4;}
-  .todo-date{font-size:11px;color:var(--text-muted);flex-shrink:0;margin-right:4px;}
   .btn-delete{width:28px;height:28px;background:none;border:none;border-radius:50%;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s;flex-shrink:0;}
   .todo-item:hover .btn-delete{opacity:1;}
   .btn-delete:hover{background:var(--danger-dim);color:var(--danger);}
-  .todo-empty{text-align:center;padding:32px 16px;color:var(--text-muted);font-size:14px;}
-  .todo-filters{display:flex;gap:4px;margin-bottom:12px;}
-  .filter-btn{padding:5px 14px;background:none;border:1px solid transparent;border-radius:20px;color:var(--text-secondary);font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;}
-  .filter-btn:hover{background:var(--bg-secondary);}
-  .filter-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(138,180,248,0.25);}
-  .clear-done{margin-left:auto;padding:5px 12px;background:none;border:none;color:var(--text-muted);font-size:12px;font-family:inherit;cursor:pointer;border-radius:20px;transition:all .15s;}
-  .clear-done:hover{color:var(--danger);background:var(--danger-dim);}
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;}
-  .modal-overlay.active{display:flex;}
-  .modal{background:var(--bg-secondary);border-radius:var(--radius);padding:24px;width:400px;max-width:90vw;box-shadow:0 8px 32px var(--shadow);}
-  .modal h3{font-size:16px;margin-bottom:16px;}
-  .modal label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
-  .modal input{width:100%;height:38px;background:var(--bg-primary);border:1px solid var(--bg-tertiary);border-radius:var(--radius-sm);padding:0 12px;color:var(--text-primary);font-size:14px;font-family:inherit;outline:none;margin-bottom:14px;transition:border-color .2s;}
-  .modal input:focus{border-color:var(--accent);}
-  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
-  .modal-actions button{padding:8px 20px;border:none;border-radius:var(--radius-sm);font-size:14px;font-family:inherit;cursor:pointer;transition:all .15s;}
-  .btn-cancel{background:var(--bg-tertiary);color:var(--text-primary);}.btn-cancel:hover{background:var(--bg-hover);}
-  .btn-save{background:var(--accent);color:#202124;font-weight:600;}.btn-save:hover{background:var(--accent-hover);}
-  .btn-remove-shortcut{padding:8px 20px;background:var(--danger-dim);color:var(--danger);border:none;border-radius:var(--radius-sm);font-size:14px;font-family:inherit;cursor:pointer;margin-right:auto;}
-  .btn-remove-shortcut:hover{background:rgba(242,139,130,0.2);}
-  .shortcut-add{border:2px dashed var(--bg-tertiary);border-radius:var(--radius);background:none;}
-  .shortcut-add .shortcut-icon{background:none;border:none;}
-  .shortcut-add:hover{border-color:var(--border);background:var(--bg-secondary);}
+  .todo-empty{text-align:center;padding:24px 16px;color:var(--text-muted);font-size:14px;}
 </style>
 </head>
 <body>
 <div class="auth-bar" id="authBar"><button class="btn-auth" onclick="doLogin()">Google 로그인</button></div>
+
 <div class="bookmark-bar">
   <a class="bm-pill" href="https://gemini.google.com"><span class="bm-emoji">❇️</span>Gemini</a>
   <a class="bm-pill" href="https://claude.ai"><span class="bm-emoji">🌟</span>Claude</a>
@@ -102,6 +142,7 @@
   <a class="bm-pill" href="https://www.overleaf.com"><span class="bm-emoji">📝</span>Overleaf-LaTeX</a>
   <a class="bm-pill" href="https://github.com"><span class="bm-emoji">🐱</span>GitHub</a>
 </div>
+
 <div class="search-container">
   <div class="search-logo">Google</div>
   <div class="search-bar" onclick="this.querySelector('input').focus()">
@@ -109,35 +150,79 @@
     <input type="text" id="searchInput" placeholder="Google 검색 또는 URL 입력" autocomplete="off">
   </div>
 </div>
+
 <div class="shortcuts-grid" id="shortcutsGrid"></div>
-<div class="todo-section">
-  <div class="todo-header">
-    <div class="todo-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>To-Do List</div>
-    <span class="todo-count" id="todoCount">0개 남음</span>
-  </div>
-  <div class="todo-input-row">
-    <input type="text" id="todoInput" placeholder="새 할 일을 입력하세요..." autocomplete="off">
-    <button class="btn-add" onclick="addTodo()">추가</button>
-  </div>
-  <div class="todo-filters">
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">전체</button>
-    <button class="filter-btn" data-filter="active" onclick="setFilter('active',this)">진행 중</button>
-    <button class="filter-btn" data-filter="done" onclick="setFilter('done',this)">완료</button>
-    <button class="clear-done" onclick="clearDone()">완료 항목 삭제</button>
-  </div>
-  <div class="todo-list" id="todoList"></div>
-</div>
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <h3 id="modalTitle">바로가기 수정</h3>
-    <label>이름</label><input type="text" id="modalName" placeholder="사이트 이름">
-    <label>URL</label><input type="text" id="modalUrl" placeholder="https://example.com">
-    <div class="modal-actions">
-      <button class="btn-remove-shortcut" id="btnRemoveShortcut" onclick="removeShortcut()" style="display:none">삭제</button>
-      <button class="btn-cancel" onclick="closeModal()">취소</button>
-      <button class="btn-save" onclick="saveShortcut()">저장</button>
+
+<!-- Quest -->
+<div class="quest-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Quest
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="quest-count" id="questCount">0개</span>
+      <button class="btn-quest-add" onclick="openQuestModal()">+ 추가</button>
     </div>
   </div>
+  <div class="quest-cards" id="questCards"></div>
+</div>
+
+<!-- Shortcut Edit Modal -->
+<div class="modal-overlay" id="shortcutModal" onclick="if(event.target===this)closeShortcutModal()">
+  <div class="modal">
+    <h3>바로가기 수정</h3>
+    <label>이름</label><input type="text" id="scName" placeholder="사이트 이름">
+    <label>URL</label><input type="text" id="scUrl" placeholder="https://example.com">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeShortcutModal()">취소</button>
+      <button class="btn-save" onclick="saveShortcutEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quest Modal -->
+<div class="modal-overlay" id="questModal" onclick="if(event.target===this)closeQuestModal()">
+  <div class="modal">
+    <h3>새 Quest 추가</h3>
+    <label>Task</label>
+    <input type="text" id="questText" placeholder="해야 할 일을 입력하세요..." autocomplete="off">
+    <div class="modal-row">
+      <div>
+        <label>Due Date</label>
+        <input type="date" id="questDue">
+      </div>
+      <div>
+        <label>우선순위</label>
+        <select id="questPriority">
+          <option value="1">P1 — 긴급</option>
+          <option value="2">P2 — 높음</option>
+          <option value="3" selected>P3 — 보통</option>
+          <option value="4">P4 — 낮음</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeQuestModal()">취소</button>
+      <button class="btn-save" onclick="addQuest()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- Daily To-Do -->
+<div class="todo-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Daily To-Do
+    </div>
+    <span class="quest-count" id="todoCount">0개 남음</span>
+  </div>
+  <div class="todo-input-row">
+    <input type="text" id="todoInput" placeholder="매일 할 일을 입력하세요..." autocomplete="off">
+    <button class="btn-add" onclick="addTodo()">추가</button>
+  </div>
+  <div class="todo-list" id="todoList"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -154,60 +239,42 @@ firebase.initializeApp({
   messagingSenderId:"676989045728",
   appId:"1:676989045728:web:4c1eb8ba12fcc04b0eb985"
 });
-const auth=firebase.auth(), dbFB=firebase.database();
-let currentUser=null, dbRef=null;
+const auth=firebase.auth(),dbFB=firebase.database();
+let currentUser=null,dbRef=null;
 
-// ── Defaults ──
-// ★ DEFAULT_SHORTCUTS를 수정할 때마다 이 숫자를 +1 하세요
-const DATA_VERSION = 2;
-
+// ── Shortcuts (10 fixed slots, right-click to edit name/url) ──
 const DEFAULT_SHORTCUTS=[
   {name:'Gmail',url:'https://mail.google.com',icon:'https://www.google.com/s2/favicons?domain=mail.google.com&sz=64'},
   {name:'Calendar',url:'https://calendar.google.com',icon:'__CAL__'},
   {name:'네이버',url:'https://www.naver.com',icon:'https://www.google.com/s2/favicons?domain=naver.com&sz=64'},
   {name:'YouTube',url:'https://www.youtube.com',icon:'https://www.google.com/s2/favicons?domain=youtube.com&sz=64'},
   {name:'경희포탈',url:'https://portal.khu.ac.kr',icon:'https://www.google.com/s2/favicons?domain=khu.ac.kr&sz=64'},
-  {name:'경희의대도서관',url:'https://kmclib.khu.ac.kr/',icon:'https://www.google.com/s2/favicons?domain=library.khu.ac.kr&sz=64'},
+  {name:'경희의대도서관',url:'https://library.khu.ac.kr',icon:'https://www.google.com/s2/favicons?domain=library.khu.ac.kr&sz=64'},
   {name:'드라이브',url:'https://drive.google.com',icon:'https://www.google.com/s2/favicons?domain=drive.google.com&sz=64'},
   {name:'Google Colab',url:'https://colab.research.google.com',icon:'https://www.google.com/s2/favicons?domain=colab.research.google.com&sz=64'},
-  {name:'K 창업지원센터',url: 'https://www.k-startup.go.kr/', icon: 'https://www.google.com/s2/favicons?domain=k-startup.go.kr&sz=64'},
-  {name:'BRIC',url:'https://www.ibric.org/bric/bioschedule/bio-schedule-notice.do', icon: 'https://www.google.com/s2/favicons?domain=ibric.org/bric/index.do&sz=64'},
+  {name:'K 창업지원센터',url:'https://startup.khu.ac.kr',icon:'https://www.google.com/s2/favicons?domain=khu.ac.kr&sz=64'},
+  {name:'iBrainnet',url:'https://www.ibrainnet.com',icon:'https://www.google.com/s2/favicons?domain=ibrainnet.com&sz=64'},
 ];
 
 // ── State ──
-let shortcuts=[...DEFAULT_SHORTCUTS], todos=[], currentFilter='all', editingIdx=-1;
+let shortcuts=[...DEFAULT_SHORTCUTS], quests=[], todos=[], editingIdx=-1;
 
 // ── Storage ──
 function saveData(){
-  const d={shortcuts,todos,lastdate:getKSTDateString(),version:DATA_VERSION};
+  const d={shortcuts,quests,todos,lastdate:getKSTDateString()};
   localStorage.setItem('hp_data',JSON.stringify(d));
   if(dbRef) dbRef.set(d);
 }
 function loadLocal(){
-  try{
-    const d=JSON.parse(localStorage.getItem('hp_data'));
-    if(d){
-      // 버전이 다르면 shortcuts를 기본값으로 리셋, todos는 유지
-      if(d.version===DATA_VERSION && d.shortcuts) shortcuts=d.shortcuts;
-      if(d.todos) todos=d.todos;
-      checkReset(d.lastdate);
-      // 버전이 달랐으면 새 버전으로 즉시 저장
-      if(d.version!==DATA_VERSION) saveData();
-    }
+  try{const d=JSON.parse(localStorage.getItem('hp_data'));
+    if(d){if(d.shortcuts)shortcuts=d.shortcuts;if(d.quests)quests=d.quests;if(d.todos)todos=d.todos;checkReset(d.lastdate);}
   }catch(e){}
 }
 function loadSnap(snap){
   const d=snap.val();
-  if(d){
-    if(d.version===DATA_VERSION && d.shortcuts) shortcuts=d.shortcuts;
-    else shortcuts=[...DEFAULT_SHORTCUTS]; // 버전 불일치 → 기본값
-    if(d.todos) todos=d.todos;
-    checkReset(d.lastdate);
-    localStorage.setItem('hp_data',JSON.stringify({...d,version:DATA_VERSION,shortcuts}));
-    // 버전이 달랐으면 Firebase도 업데이트
-    if(d.version!==DATA_VERSION) saveData();
-  }
-  renderShortcuts();renderTodos();
+  if(d){if(d.shortcuts)shortcuts=d.shortcuts;else shortcuts=[...DEFAULT_SHORTCUTS];if(d.quests)quests=d.quests;else quests=[];if(d.todos)todos=d.todos;else todos=[];checkReset(d.lastdate);
+    localStorage.setItem('hp_data',JSON.stringify(d));}
+  renderAll();
 }
 
 // ── Auth ──
@@ -222,7 +289,7 @@ auth.onAuthStateChanged(u=>{
   }else{
     if(dbRef){dbRef.off();dbRef=null;}
     bar.innerHTML='<button class="btn-auth" onclick="doLogin()">Google 로그인</button>';
-    loadLocal();renderShortcuts();renderTodos();
+    loadLocal();renderAll();
   }
 });
 
@@ -243,46 +310,135 @@ function calIcon(){
   return c.toDataURL();
 }
 
-// ── Shortcuts ──
+// ── Shortcuts (fixed 10 slots, right-click to edit) ──
 function renderShortcuts(){
   const g=document.getElementById('shortcutsGrid');g.innerHTML='';
   shortcuts.forEach((s,i)=>{const a=document.createElement('a');a.className='shortcut';a.href=s.url;
     const ic=s.icon==='__CAL__'?calIcon():s.icon;
     a.innerHTML=`<div class="shortcut-icon"><img src="${ic}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2218%22 font-size=%2216%22>${s.name[0]}</text></svg>'"></div><span class="shortcut-label">${s.name}</span>`;
-    a.addEventListener('contextmenu',e=>{e.preventDefault();openModal(i);});g.appendChild(a);});
-  const ab=document.createElement('div');ab.className='shortcut shortcut-add';ab.onclick=()=>openModal(-1);
-  ab.innerHTML='<div class="shortcut-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="shortcut-label">바로가기 추가</span>';
-  g.appendChild(ab);
+    a.addEventListener('contextmenu',e=>{e.preventDefault();openShortcutModal(i);});
+    g.appendChild(a);});
 }
-function openModal(i){editingIdx=i;const n=document.getElementById('modalName'),u=document.getElementById('modalUrl'),r=document.getElementById('btnRemoveShortcut'),t=document.getElementById('modalTitle');
-  if(i>=0){t.textContent='바로가기 수정';n.value=shortcuts[i].name;u.value=shortcuts[i].url;r.style.display='block';}
-  else{t.textContent='바로가기 추가';n.value='';u.value='';r.style.display='none';}
-  document.getElementById('modalOverlay').classList.add('active');n.focus();}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('active');}
-function saveShortcut(){const n=document.getElementById('modalName').value.trim();let u=document.getElementById('modalUrl').value.trim();if(!n||!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;const ic='https://www.google.com/s2/favicons?domain='+new URL(u).hostname+'&sz=64';if(editingIdx>=0)shortcuts[editingIdx]={name:n,url:u,icon:ic};else shortcuts.push({name:n,url:u,icon:ic});saveData();renderShortcuts();closeModal();}
-function removeShortcut(){if(editingIdx>=0)shortcuts.splice(editingIdx,1);saveData();renderShortcuts();closeModal();}
+function openShortcutModal(i){
+  editingIdx=i;
+  document.getElementById('scName').value=shortcuts[i].name;
+  document.getElementById('scUrl').value=shortcuts[i].url;
+  document.getElementById('shortcutModal').classList.add('active');
+  document.getElementById('scName').focus();
+}
+function closeShortcutModal(){document.getElementById('shortcutModal').classList.remove('active');}
+function saveShortcutEdit(){
+  const n=document.getElementById('scName').value.trim();
+  let u=document.getElementById('scUrl').value.trim();
+  if(!n||!u)return;
+  if(!/^https?:\/\//i.test(u))u='https://'+u;
+  const ic='https://www.google.com/s2/favicons?domain='+new URL(u).hostname+'&sz=64';
+  shortcuts[editingIdx]={name:n,url:u,icon:ic};
+  saveData();renderShortcuts();closeShortcutModal();
+}
 
-// ── To-Do ──
+// ── Quest ──
+function openQuestModal(){
+  document.getElementById('questText').value='';
+  document.getElementById('questDue').value='';
+  document.getElementById('questPriority').value='3';
+  document.getElementById('questModal').classList.add('active');
+  document.getElementById('questText').focus();
+}
+function closeQuestModal(){document.getElementById('questModal').classList.remove('active');}
+
+function addQuest(){
+  const text=document.getElementById('questText').value.trim();
+  const due=document.getElementById('questDue').value;
+  const pri=parseInt(document.getElementById('questPriority').value);
+  if(!text)return;
+  quests.push({id:Date.now(),text,due:due||null,priority:pri});
+  saveData();renderQuests();closeQuestModal();
+}
+
+function completeQuest(id){
+  quests=quests.filter(q=>q.id!==id);
+  saveData();renderQuests();
+}
+
+function getDDay(dueStr){
+  if(!dueStr)return null;
+  const now=new Date();const kst=new Date(now.getTime()+(9*3600000));
+  const today=kst.toISOString().slice(0,10);
+  const diff=Math.ceil((new Date(dueStr)-new Date(today))/(86400000));
+  return diff;
+}
+
+function formatDDay(dueStr){
+  const d=getDDay(dueStr);
+  if(d===null)return '';
+  if(d<0)return `D+${Math.abs(d)} (지남)`;
+  if(d===0)return 'D-Day';
+  return `D-${d}`;
+}
+
+function renderQuests(){
+  const c=document.getElementById('questCards');
+  // Sort: priority asc, then due date asc (null last)
+  const sorted=[...quests].sort((a,b)=>{
+    if(a.priority!==b.priority)return a.priority-b.priority;
+    if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return -1;
+    return a.due.localeCompare(b.due);
+  });
+
+  document.getElementById('questCount').textContent=quests.length+'개';
+
+  if(!sorted.length){c.innerHTML='<div class="quest-empty">Quest를 추가해 보세요</div>';return;}
+
+  c.innerHTML=sorted.map(q=>{
+    const dd=getDDay(q.due);
+    let cls=`quest-card p${q.priority}`;
+    if(dd===0)cls+=' due-today';
+    else if(dd===1)cls+=' due-tomorrow';
+    const dueLabel=q.due?`${q.due} (${formatDDay(q.due)})`:'기한 없음';
+    return `<div class="${cls}">
+      <div class="quest-priority">P${q.priority}</div>
+      <div class="quest-body">
+        <div class="quest-text">${escapeHtml(q.text)}</div>
+        <div class="quest-due">${dueLabel}</div>
+      </div>
+      <button class="btn-quest-done" onclick="completeQuest(${q.id})">완료</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Daily To-Do ──
 function getKSTDateString(){const n=new Date();return new Date(n.getTime()+(9*3600000)).toISOString().slice(0,10);}
 function checkReset(last){if(last&&last!==getKSTDateString())todos.forEach(t=>{t.done=false;});}
-function addTodo(){const inp=document.getElementById('todoInput'),t=inp.value.trim();if(!t)return;todos.unshift({id:Date.now(),text:t,done:false,date:new Date().toLocaleDateString('ko-KR',{month:'short',day:'numeric'})});inp.value='';saveData();renderTodos();}
+
+function addTodo(){
+  const inp=document.getElementById('todoInput'),t=inp.value.trim();if(!t)return;
+  todos.push({id:Date.now(),text:t,done:false});
+  inp.value='';saveData();renderTodos();
+}
 document.getElementById('todoInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTodo();});
+
 function toggleTodo(id){const t=todos.find(t=>t.id===id);if(t)t.done=!t.done;saveData();renderTodos();}
 function deleteTodo(id){todos=todos.filter(t=>t.id!==id);saveData();renderTodos();}
-function clearDone(){todos=todos.filter(t=>!t.done);saveData();renderTodos();}
-function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTodos();}
+
 function renderTodos(){
-  const l=document.getElementById('todoList');let f=todos;
-  if(currentFilter==='active')f=todos.filter(t=>!t.done);if(currentFilter==='done')f=todos.filter(t=>t.done);
+  const l=document.getElementById('todoList');
   document.getElementById('todoCount').textContent=todos.filter(t=>!t.done).length+'개 남음';
-  if(!f.length){l.innerHTML=`<div class="todo-empty">${currentFilter==='done'?'완료된 항목이 없습니다':currentFilter==='active'?'모든 할 일을 완료했습니다 🎉':'할 일을 추가해 보세요'}</div>`;return;}
-  l.innerHTML=f.map(t=>`<div class="todo-item ${t.done?'done':''}"><div class="todo-checkbox" onclick="toggleTodo(${t.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span class="todo-text">${escapeHtml(t.text)}</span><span class="todo-date">${t.date}</span><button class="btn-delete" onclick="deleteTodo(${t.id})" title="삭제"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('');
+  if(!todos.length){l.innerHTML='<div class="todo-empty">매일 할 일을 추가해 보세요</div>';return;}
+  l.innerHTML=todos.map(t=>`<div class="todo-item ${t.done?'done':''}">
+    <div class="todo-checkbox" onclick="toggleTodo(${t.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <span class="todo-text">${escapeHtml(t.text)}</span>
+    <button class="btn-delete" onclick="deleteTodo(${t.id})" title="삭제"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>`).join('');
 }
+
+// ── Helpers ──
 setInterval(()=>{checkReset(getKSTDateString());renderTodos();},60000);
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function renderAll(){renderShortcuts();renderQuests();renderTodos();}
 
 // ── Init ──
-loadLocal();renderShortcuts();renderTodos();
+loadLocal();renderAll();
 </script>
 </body>
 </html>
