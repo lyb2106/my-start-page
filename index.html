@@ -447,7 +447,10 @@
 <script>
 // ── Config ──
 const CLIENT_ID='676989045728-c3bavcs39ppmvvekb92lbnmssrs66bkj.apps.googleusercontent.com';
-const SCOPES='openid email profile https://www.googleapis.com/auth/drive.appdata';
+// drive.appdata kept only for one-time migration; drive.file is the new home for all reads/writes.
+const SCOPES='openid email profile https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
+const SCOPE_VERSION='v2-folder';
+const FOLDER_NAME='.my-start-page';
 const CAT_COLOR={'피치':'#f28b82','BCI':'#fdd663','타이탄':'#a8b8c4','오로라':'#81c995','개인플젝':'#8ab4f8','기타':'#9aa0a6'};
 const SLOT_MIN=30, SLOT_PX=30, HOUR_START=6, HOUR_END=24;
 const SLOT_COUNT=(HOUR_END-HOUR_START)*60/SLOT_MIN;   // 36
@@ -474,8 +477,16 @@ async function onGsiLoad(){
   });
   const t=localStorage.getItem('drive_token'),
         e=parseInt(localStorage.getItem('drive_token_expiry')||'0'),
-        p=localStorage.getItem('drive_user');
+        p=localStorage.getItem('drive_user'),
+        sv=localStorage.getItem('drive_scope_version');
   if(p){try{userProfile=JSON.parse(p);}catch(_){}}
+  // Force re-consent if scope set changed (drive.appdata → +drive.file)
+  if(sv!==SCOPE_VERSION){
+    localStorage.removeItem('drive_token');
+    localStorage.removeItem('drive_token_expiry');
+    renderAuth();
+    return;
+  }
   if(t && Date.now()<e-60000){
     accessToken=t; tokenExpiry=e;
     renderAuth(); loadAllFromDrive();
@@ -493,6 +504,7 @@ function onTokenResponse(r){
     tokenExpiry=Date.now()+(r.expires_in||3600)*1000;
     localStorage.setItem('drive_token',accessToken);
     localStorage.setItem('drive_token_expiry',tokenExpiry+'');
+    localStorage.setItem('drive_scope_version',SCOPE_VERSION);
     fetchUserProfile().then(()=>{renderAuth(); loadAllFromDrive();});
   }else{
     console.error('token response failed',r);
@@ -537,13 +549,44 @@ function renderAuth(){
   }
 }
 
-// ── Drive API wrapper (appDataFolder) ──
+// ── Drive API wrapper (regular folder, name in FOLDER_NAME) ──
 const DRIVE_API='https://www.googleapis.com/drive/v3';
 const DRIVE_UPLOAD='https://www.googleapis.com/upload/drive/v3';
 
+let appFolderId=null;
+let folderLookupPromise=null;
+
+// Find-or-create the app folder. drive.file scope only sees folders this app created,
+// so a name search is reliable across sessions; we cache the ID in memory for the session.
+async function driveGetFolderId(){
+  if(appFolderId)return appFolderId;
+  if(folderLookupPromise)return folderLookupPromise;
+  folderLookupPromise=(async()=>{
+    if(!isTokenValid())return null;
+    const q=`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const r=await driveFetchJson(`${DRIVE_API}/files?q=${encodeURIComponent(q)}&fields=files(id,name)`);
+    if(r && r.files && r.files.length){
+      appFolderId=r.files[0].id;
+    }else{
+      const meta={name:FOLDER_NAME,mimeType:'application/vnd.google-apps.folder'};
+      const c=await driveFetchJson(`${DRIVE_API}/files?fields=id`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(meta)
+      });
+      if(c && c.id)appFolderId=c.id;
+    }
+    return appFolderId;
+  })();
+  try{return await folderLookupPromise;}
+  finally{folderLookupPromise=null;}
+}
+
 async function driveFind(name){
-  const q=`name='${name}' and 'appDataFolder' in parents and trashed=false`;
-  const r=await driveFetchJson(`${DRIVE_API}/files?spaces=appDataFolder&q=${encodeURIComponent(q)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`);
+  const folderId=await driveGetFolderId();
+  if(!folderId)return null;
+  const q=`name='${name}' and '${folderId}' in parents and trashed=false`;
+  const r=await driveFetchJson(`${DRIVE_API}/files?q=${encodeURIComponent(q)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`);
   if(!r||!r.files||!r.files.length)return null;
   return r.files[0];
 }
@@ -553,7 +596,9 @@ async function driveLoad(fileId){
 }
 
 async function driveCreate(name,content){
-  const metadata={name,parents:['appDataFolder']};
+  const folderId=await driveGetFolderId();
+  if(!folderId)return null;
+  const metadata={name,parents:[folderId]};
   const boundary='-----'+Math.random().toString(36).slice(2);
   const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(content)}\r\n--${boundary}--`;
   return driveFetchJson(`${DRIVE_UPLOAD}/files?uploadType=multipart&fields=id`,{
@@ -680,9 +725,38 @@ function scheduleSave(name,getContent){
 
 async function loadAllFromDrive(){
   // cache→paint already happened in init; this fetches latest from Drive
+  await migrateFromAppData();
   await Promise.all([loadDailyJob(),loadBrainDump(),loadTimeplan(currentDate),loadProjects()]);
   checkDailyJobReset();
   renderAll();
+}
+
+// One-time copy of pre-existing appDataFolder contents into the new visible folder.
+// Safe to run repeatedly: skips files that already exist in the destination.
+async function migrateFromAppData(){
+  if(localStorage.getItem('hp:migrated_v2'))return;
+  if(!isTokenValid())return;
+  try{
+    const r=await driveFetchJson(`${DRIVE_API}/files?spaces=appDataFolder&q=trashed=false&fields=files(id,name)&pageSize=1000`);
+    if(!r)return; // network/scope failure - retry on next load
+    if(!r.files||!r.files.length){
+      localStorage.setItem('hp:migrated_v2','1');
+      return;
+    }
+    const folderId=await driveGetFolderId();
+    if(!folderId)return;
+    let migrated=0, skipped=0;
+    for(const f of r.files){
+      const existing=await driveFind(f.name);
+      if(existing){skipped++;continue;}
+      const content=await driveLoad(f.id);
+      if(content===null)continue;
+      const c=await driveCreate(f.name,content);
+      if(c)migrated++;
+    }
+    console.log(`[migration] ${migrated} files copied to ${FOLDER_NAME}, ${skipped} already present`);
+    localStorage.setItem('hp:migrated_v2','1');
+  }catch(e){console.error('migration failed',e);}
 }
 
 async function loadDailyJob(){
@@ -1311,8 +1385,10 @@ async function docsOpenList(){
 function docsCloseList(){document.getElementById('docsListModal').classList.remove('active');}
 
 async function docsFetchAll(){
-  const q=`name contains 'doc-' and 'appDataFolder' in parents and trashed=false`;
-  const r=await driveFetchJson(`${DRIVE_API}/files?spaces=appDataFolder&q=${encodeURIComponent(q)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc&pageSize=200`);
+  const folderId=await driveGetFolderId();
+  if(!folderId)return [];
+  const q=`name contains 'doc-' and '${folderId}' in parents and trashed=false`;
+  const r=await driveFetchJson(`${DRIVE_API}/files?q=${encodeURIComponent(q)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc&pageSize=200`);
   if(!r||!r.files)return [];
   const docs=[];
   for(const f of r.files){

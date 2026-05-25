@@ -19,17 +19,22 @@ Personal browser start page (new tab replacement). UI is Korean (`lang="ko"`). D
 | Layer | Storage | Lifetime | Edited by |
 |---|---|---|---|
 | Static | `data/*.json` in git | Permanent in repo | Manual edit + commit |
-| Dynamic | Google Drive `appDataFolder` (per-user, hidden) + localStorage cache | Per-user | Page UI |
+| Dynamic | Google Drive folder `.my-start-page` (regular, user-visible at Drive root) + localStorage cache | Per-user | Page UI |
 
 **Static**: bookmark pills, shortcut grid, doc templates. To change, edit the JSON, commit, push. No UI for editing — the right-click edit modal was removed. `data/templates.json` defines the 5 docs templates (`product_dev`, `rnd_grant`, `biz_proposal`, `academic_paper`, `blank`); each has `{id, label, sections:[{q, hint}]}`. Hints are the gray pre-fill text shown in the editor.
 
-**Dynamic**: Daily Job, Brain Dump, Time Plan, Project Documents. Read/written via Drive REST API after Google login.
+**Dynamic**: Daily Job, Brain Dump, Time Plan, Project Chart, Project Documents. Read/written via Drive REST API after Google login. All files live in a single folder named `.my-start-page` at the root of My Drive. The leading `.` is cosmetic — Drive does not treat it as hidden; it just makes the folder look unfamiliar enough that the user is less likely to delete it while browsing. Because this is a regular Drive folder (not the old app-private `appDataFolder`), other apps and tools (e.g., Claude.ai's Google Drive MCP connector) can also read these files.
 
-Drive files (all in `appDataFolder` — invisible in user's Drive UI, app-private):
+Drive files (all inside `.my-start-page`):
 - `dailyJob.json` — `{items:[{id,text,done}], lastResetDate}`. Resets at 06:00 KST (full clear, not just unchecking).
 - `brainDump.json` — `[{id, category, name, createdAt}]`. `createdAt` is immutable after creation.
 - `timeplan-YYYY-MM-DD.json` — `[{id, start, end, text, category, sourceType}]`. One file per day. `sourceType ∈ {'brainDump','dailyJob','manual'}` indicates origin of the block.
-- `doc-<id>.json` — `{id, templateId, title, createdAt, updatedAt, sections:[{q,a}]}`. One file per project document. `id` is `uid()`. The list is discovered via `name contains 'doc-' and 'appDataFolder' in parents`. `.md`/`.txt` export is generated client-side from this JSON — nothing is persisted in those formats.
+- `projectChart.json` — `[{id,name,purpose,tasks:[{id,text,done}],startDate,dueDate,createdAt}]`. Project progress chart data.
+- `doc-<id>.json` — `{id, templateId, title, createdAt, updatedAt, sections:[{q,a}]}`. One file per project document. `id` is `uid()`. The list is discovered via `name contains 'doc-'` filtered to the `.my-start-page` folder ID. `.md`/`.txt` export is generated client-side from this JSON — nothing is persisted in those formats.
+
+**Folder lookup (`driveGetFolderId`)**: on first authenticated use of the session, the app searches Drive by name+mimeType for a folder named `.my-start-page` that this OAuth client owns; if missing, it creates one. The folder ID is cached in memory (not localStorage) for the rest of the session, so a user-side deletion or rename is recoverable by reload. With `drive.file` scope the app can only see folders/files it created itself, which is why the cached approach is safe across page loads.
+
+**One-time migration (`migrateFromAppData`)**: on the first authenticated load after the upgrade, every file in the legacy `appDataFolder` is copied into `.my-start-page` (existing destination files win — the copy is skip-if-present). After success, `localStorage['hp:migrated_v2']='1'` blocks further runs. The originals in `appDataFolder` are left in place as a safety net — they can be cleaned up by revoking app access in the Google Account settings.
 
 ## State → persistence → render flow
 
@@ -55,7 +60,11 @@ List: `docsFetchAll()` does a Drive search (`name contains 'doc-'`) then loads e
 
 ## Auth
 
-Google Identity Services token client with scope `openid email profile https://www.googleapis.com/auth/drive.appdata`. Access token kept in `localStorage` (`drive_token`, `drive_token_expiry`, `drive_user`) so a single login persists across tabs and browser restarts. On 401 from Drive, `refreshToken()` does one silent retry via `requestAccessToken({prompt:''})`. On page load, if a stored `drive_user` exists but the token is missing/expired, `onGsiLoad` runs the same silent refresh before showing the login button — so a returning user auto-reconnects without UI.
+Google Identity Services token client with scopes `openid email profile https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file`. `drive.file` is the primary scope (the app sees only files/folders it created in regular Drive); `drive.appdata` is kept solely for the one-time migration to read the legacy `appDataFolder` contents and can be dropped in a future cleanup.
+
+Access token kept in `localStorage` (`drive_token`, `drive_token_expiry`, `drive_user`) so a single login persists across tabs and browser restarts. On 401 from Drive, `refreshToken()` does one silent retry via `requestAccessToken({prompt:''})`. On page load, if a stored `drive_user` exists but the token is missing/expired, `onGsiLoad` runs the same silent refresh before showing the login button — so a returning user auto-reconnects without UI.
+
+**Scope version gate.** `localStorage['drive_scope_version']` is compared against the `SCOPE_VERSION` constant in code. When the constant changes (e.g., a new scope is added), `onGsiLoad` discards the stored token and forces a fresh consent click — silent refresh cannot grant scopes the user has never approved. Bump `SCOPE_VERSION` whenever you touch `SCOPES`.
 
 `CLIENT_ID` constant is the OAuth Web Client public ID — safe to commit because origin restriction (`https://lyb2106.github.io` + `http://localhost:8000`) enforces security. To rotate, regenerate in GCP project `my-start-page-a48c0` and update the constant.
 
